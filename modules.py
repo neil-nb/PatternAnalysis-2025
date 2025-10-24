@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import torch.nn.functional as F
 
 class ConvBNAct(nn.Module):
     def __init__(self, in_ch, out_ch, k=3, s=1, p="same", groups=1, act=True):
@@ -35,3 +36,15 @@ class sSE(nn.Module):
 
     def forward(self, x):
         return x * torch.sigmoid(self.conv(x))
+    
+class cSE(nn.Module):
+    def __init__(self, ch, r=16):
+        super().__init__()
+        self.fc1 = nn.Conv2d(ch, ch // r, kernel_size=1)
+        self.fc2 = nn.Conv2d(ch // r, ch, kernel_size=1)
+
+    def forward(self, x):
+        z = F.adaptive_avg_pool2d(x, 1)
+        z = F.relu(self.fc1(z), inplace=True)
+        z = torch.sigmoid(self.fc2(z))
+        return x * z
