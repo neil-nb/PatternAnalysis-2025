@@ -30,3 +30,21 @@ class HipMRIDataset(Dataset):
         else:
             tensor = F.interpolate(tensor.unsqueeze(0), size=self.output_shape, mode='bilinear', align_corners=False).squeeze(0)
         return tensor
+    
+    def __getitem__(self, idx):
+        image_np = self._read_nifti(self.images[idx])
+        mask_np = self._read_nifti(self.masks[idx])
+
+        if self.standardise:
+            mean, std = image_np.mean(), image_np.std()
+            image_np = (image_np - mean) / (std + 1e-6)
+
+        mask_np = np.rint(mask_np).astype(np.int64)
+
+        image_tensor = self._prepare_tensor(image_np)
+        mask_tensor = self._prepare_tensor(mask_np, is_mask=True)
+
+        if self.apply_transform:
+            image_tensor, mask_tensor = self.apply_transform(image_tensor, mask_tensor)
+
+        return image_tensor, mask_tensor
