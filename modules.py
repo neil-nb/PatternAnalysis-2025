@@ -48,3 +48,12 @@ class cSE(nn.Module):
         z = F.relu(self.fc1(z), inplace=True)
         z = torch.sigmoid(self.fc2(z))
         return x * z
+    
+class scSE(nn.Module):
+    def __init__(self, ch):
+        super().__init__()
+        self.s = sSE(ch)
+        self.c = cSE(ch)
+        
+    def forward(self, x):
+        return self.s(x) + self.c(x)
