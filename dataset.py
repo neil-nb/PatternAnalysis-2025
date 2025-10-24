@@ -1,9 +1,10 @@
 import os
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import nibabel as nib
 import numpy as np
 import torch.nn.functional as F
+
 
 class ProstateSegmentationDataset(Dataset):
     def __init__(self, img_dir, mask_dir, apply_transform=None, standardise=False, output_shape=(256, 128)):
@@ -50,3 +51,6 @@ class ProstateSegmentationDataset(Dataset):
         return image_tensor, mask_tensor
 
 
+def build_loader(img_dir, mask_dir, batch_size=4, standardise=False, output_shape=(256, 128), shuffle=True, num_workers=0):
+    dataset = ProstateSegmentationDataset(img_dir=img_dir, mask_dir=mask_dir, standardise=standardise, output_shape=output_shape)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
