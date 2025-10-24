@@ -5,7 +5,7 @@ import nibabel as nib
 import numpy as np
 import torch.nn.functional as F
 
-class HipMRIDataset(Dataset):
+class ProstateSegmentationDataset(Dataset):
     def __init__(self, img_dir, mask_dir, apply_transform=None, standardise=False, output_shape=(256, 128)):
         self.images = sorted(
             [os.path.join(img_dir, f) for f in os.listdir(img_dir) if f.endswith(('.nii', '.nii.gz'))]
@@ -48,3 +48,5 @@ class HipMRIDataset(Dataset):
             image_tensor, mask_tensor = self.apply_transform(image_tensor, mask_tensor)
 
         return image_tensor, mask_tensor
+
+
