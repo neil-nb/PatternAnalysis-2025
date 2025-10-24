@@ -1,5 +1,7 @@
 import os
 from torch.utils.data import Dataset
+import nibabel as nib
+import numpy as np
 
 class HipMRIDataset(Dataset):
     def __init__(self, img_dir, mask_dir, apply_transform=None, standardise=False, output_shape=(256, 128)):
@@ -16,3 +18,5 @@ class HipMRIDataset(Dataset):
     def __len__(self):
         return len(self.images)
 
+    def _read_nifti(self, path):
+        return nib.load(path).get_fdata(dtype=np.float32)
