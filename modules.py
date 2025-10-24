@@ -9,3 +9,20 @@ class ConvBNAct(nn.Module):
 
     def forward(self, x):
         return self.act(self.bn(self.conv(x)))
+
+class ResidualBlock(nn.Module):
+    def __init__(self, in_ch, out_ch, dropout_p=0.0):
+        super().__init__()
+        self.proj = nn.Identity() if in_ch == out_ch else ConvBNAct(in_ch, out_ch, k=1, act=False)
+        self.conv1 = ConvBNAct(in_ch, out_ch)
+        self.conv2 = ConvBNAct(out_ch, out_ch, act=False)
+        self.drop = nn.Dropout2d(p=dropout_p) if dropout_p > 0 else nn.Identity()
+        self.act = nn.ReLU(inplace=True)
+        
+    def forward(self, x):
+        residual = self.proj(x)
+        x = self.conv1(x)
+        x = self.drop(x)
+        x = self.conv2(x)
+        x = x + residual
+        return self.act(x)
