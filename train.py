@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
 import time
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -113,6 +114,7 @@ def train_model():
     print(f"Total training time: {end_time - start_time:.2f} seconds")
 
     torch.save(net.state_dict(), "model.pth")
+    plot_losses(train_losses, val_losses)
 
 def validate_model():
     net.eval()
@@ -130,3 +132,16 @@ def validate_model():
     avg_val_loss = val_loss / len(val_loader)
     print(f"Validation Loss: {avg_val_loss:.4f}")
     return avg_val_loss
+
+def plot_losses(train_losses, val_losses):
+    epochs = range(1, len(train_losses) + 1)
+    plt.figure(figsize=(10, 6))
+    plt.plot(epochs, train_losses, "b", label="Training Loss")
+    plt.plot(epochs, val_losses, "r", label="Validation Loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Loss")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("loss_graph.png")
+    plt.close()
