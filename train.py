@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from modules import ImprovedUNet
 from dataset import create_dataloaders
+import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -27,3 +28,20 @@ def init_weights(m):
             nn.init.constant_(m.bias, 0)
 
 net.apply(init_weights)
+
+class GeneralizedDiceLoss(nn.Module):
+    def __init__(self, eps=1e-6):
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, logits, target):
+        num_classes = logits.shape[1]
+        probs = F.softmax(logits, dim=1)
+        target_1h = F.one_hot(target.long(), num_classes=num_classes).permute(0, 3, 1, 2).float()
+        dims = (0, 2, 3)
+        w = 1.0 / (torch.clamp(target_1h.sum(dim=dims), min=self.eps) ** 2)
+        intersection = (probs * target_1h).sum(dim=dims)
+        union = probs.sum(dim=dims) + target_1h.sum(dim=dims)
+        dice = (2.0 * intersection + self.eps) / (union + self.eps)
+        gdice = 1.0 - (w * dice).sum() / torch.clamp(w.sum(), min=self.eps)
+        return gdice
