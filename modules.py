@@ -107,3 +107,13 @@ class ImprovedUNet(nn.Module):
         self.p4 = nn.MaxPool2d(2)
 
         self.b = nn.Sequential(ResidualBlock(base_ch*8, base_ch*16, dropout_p), scSE(base_ch*16))
+
+        self.d4 = UpSampleBlock(base_ch*16, base_ch*8, base_ch*8, dropout_p)
+        self.d3 = UpSampleBlock(base_ch*8, base_ch*4, base_ch*4, dropout_p)
+        self.d2 = UpSampleBlock(base_ch*4, base_ch*2, base_ch*2, dropout_p)
+        self.d1 = UpSampleBlock(base_ch*2, base_ch, base_ch, dropout_p)
+
+        self.out = nn.Conv2d(base_ch, num_classes, kernel_size=1)
+        self.aux2 = nn.Conv2d(base_ch*2, num_classes, kernel_size=1)
+        self.aux3 = nn.Conv2d(base_ch*4, num_classes, kernel_size=1)
+
