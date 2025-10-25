@@ -5,6 +5,7 @@ from dataset import create_dataloaders
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
+import time
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -63,3 +64,48 @@ class ComboLoss(nn.Module):
 optimizer = optim.AdamW(net.parameters(), lr=learning_rate, weight_decay=1e-2)
 scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-5)
 scaler = torch.amp.GradScaler("cuda", enabled=(device.type == "cuda"))
+criterion = ComboLoss(alpha=0.5)
+
+def train_model():
+    print("Starting training\n")
+    start_time = time.time()
+
+    for epoch in range(num_epochs):
+        net.train()
+        epoch_loss = 0.0
+
+        for i, (images, masks) in enumerate(train_loader):
+            images, masks = images.to(device), masks.to(device)
+            optimizer.zero_grad(set_to_none=True)
+
+            with torch.amp.autocast("cuda", enabled=(device.type == "cuda")):
+                outputs = net(images)
+                if isinstance(outputs, tuple):
+                    main, aux2, aux3 = outputs
+                    loss_main = criterion(main, masks.squeeze(1))
+                    loss_aux2 = criterion(aux2, masks.squeeze(1))
+                    loss_aux3 = criterion(aux3, masks.squeeze(1))
+                    loss = 0.6 * loss_main + 0.25 * loss_aux2 + 0.15 * loss_aux3
+                else:
+                    loss = criterion(outputs, masks.squeeze(1))
+
+            scaler.scale(loss).backward()
+            torch.nn.utils.clip_grad_norm_(net.parameters(), max_norm=1.0)
+            scaler.step(optimizer)
+            scaler.update()
+
+            epoch_loss += loss.item()
+
+            if (i + 1) % batch_size == 0:
+                print(f"Epoch [{epoch+1}/{num_epochs}], Batch [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
+
+        avg_train_loss = epoch_loss / len(train_loader)
+        print(f"Epoch {epoch+1}, Average Training Loss: {avg_train_loss:.4f}")
+
+        scheduler.step()
+
+    end_time = time.time()
+    print("\nFinished Training")
+    print(f"Total training time: {end_time - start_time:.2f} seconds")
+
+    torch.save(net.state_dict(), "model.pth")
