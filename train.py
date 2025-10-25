@@ -45,3 +45,13 @@ class GeneralizedDiceLoss(nn.Module):
         dice = (2.0 * intersection + self.eps) / (union + self.eps)
         gdice = 1.0 - (w * dice).sum() / torch.clamp(w.sum(), min=self.eps)
         return gdice
+    
+class ComboLoss(nn.Module):
+    def __init__(self, ce_weight=None, alpha=0.5):
+        super().__init__()
+        self.alpha = alpha
+        self.dice = GeneralizedDiceLoss()
+        self.ce = nn.CrossEntropyLoss(weight=ce_weight)
+
+    def forward(self, logits, target):
+        return self.alpha * self.dice(logits, target) + (1.0 - self.alpha) * self.ce(logits, target)
