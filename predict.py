@@ -3,6 +3,8 @@ from dataset import create_dataloaders
 from modules import ImprovedUNet
 import torch.nn.functional as F
 import numpy as np
+import matplotlib.pyplot as plt
+import random
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -51,6 +53,36 @@ def evaluate_model(model, data_loader, device, num_classes):
         print(f"Class {i}: {dice_score:.4f}")
     print(f"Overall Average Dice Score: {average_dice_per_class.mean():.4f}")
 
+
+def visualize_predictions(model, data_loader, device, num_classes):
+    dataset_size = len(data_loader.dataset)
+    indices = random.sample(range(dataset_size), 3)
+    samples = [data_loader.dataset[i] for i in indices]
+
+    for idx, (image, true_mask) in enumerate(samples):
+        image = image.unsqueeze(0).to(device)
+        true_mask = true_mask.squeeze().cpu().numpy()
+
+        with torch.no_grad():
+            pred_mask = model(image)
+            if isinstance(pred_mask, tuple):
+                pred_mask = pred_mask[0]
+            pred_mask = torch.argmax(pred_mask, dim=1).squeeze().cpu().numpy()
+
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+        axes[0].imshow(image.squeeze().cpu().numpy(), cmap='gray')
+        axes[0].set_title("Original Image")
+        axes[1].imshow(true_mask, cmap='gray')
+        axes[1].set_title("True Segmentation")
+        axes[2].imshow(pred_mask, cmap='gray')
+        axes[2].set_title("Predicted Segmentation")
+
+        for ax in axes:
+            ax.axis('off')
+
+        plt.tight_layout()
+        plt.savefig(f'validation_{idx + 1}.png')
+        plt.close()
 
 if __name__ == "__main__":
     print("Hello, World!")
