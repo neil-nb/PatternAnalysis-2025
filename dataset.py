@@ -7,15 +7,11 @@ import torch.nn.functional as F
 
 
 class ProstateSegmentationDataset(Dataset):
-    def __init__(self, img_dir, mask_dir, apply_transform=None, standardise=False, output_shape=(256, 128)):
-        self.images = sorted(
-            [os.path.join(img_dir, f) for f in os.listdir(img_dir) if f.endswith(('.nii', '.nii.gz'))]
-        )
-        self.masks = sorted(
-            [os.path.join(mask_dir, f) for f in os.listdir(mask_dir) if f.endswith(('.nii', '.nii.gz'))]
-        )
+    def __init__(self, img_dir, mask_dir, apply_transform=None, standardize=False, output_shape=(256, 128)):
+        self.images = sorted([os.path.join(img_dir, f) for f in os.listdir(img_dir) if f.endswith(('.nii', '.nii.gz'))])
+        self.masks = sorted([os.path.join(mask_dir, f) for f in os.listdir(mask_dir) if f.endswith(('.nii', '.nii.gz'))])
         self.apply_transform = apply_transform
-        self.standardise = standardise
+        self.standardize = standardize
         self.output_shape = output_shape
 
     def __len__(self):
@@ -36,7 +32,7 @@ class ProstateSegmentationDataset(Dataset):
         image_np = self._read_nifti(self.images[idx])
         mask_np = self._read_nifti(self.masks[idx])
 
-        if self.standardise:
+        if self.standardize:
             mean, std = image_np.mean(), image_np.std()
             image_np = (image_np - mean) / (std + 1e-6)
 
@@ -50,8 +46,8 @@ class ProstateSegmentationDataset(Dataset):
 
         return image_tensor, mask_tensor
 
-def create_dataloaders(image_dir, mask_dir, batch_size, normImage=False):
-    dataset = ProstateSegmentationDataset(image_dir, mask_dir, normImage=normImage)
+def create_dataloaders(image_dir, mask_dir, batch_size, standardize=False):
+    dataset = ProstateSegmentationDataset(image_dir, mask_dir, standardize=standardize)
     
     loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return loader
