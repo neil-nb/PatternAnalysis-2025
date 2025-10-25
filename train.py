@@ -109,3 +109,20 @@ def train_model():
     print(f"Total training time: {end_time - start_time:.2f} seconds")
 
     torch.save(net.state_dict(), "model.pth")
+
+def validate_model():
+    net.eval()
+    val_loss = 0.0
+
+    with torch.no_grad(), torch.amp.autocast("cuda", enabled=(device.type == "cuda")):
+        for images, masks in val_loader:
+            images, masks = images.to(device), masks.to(device)
+            outputs = net(images)
+            if isinstance(outputs, tuple):
+                outputs = outputs[0]
+            loss = criterion(outputs, masks.squeeze(1))
+            val_loss += loss.item()
+
+    avg_val_loss = val_loss / len(val_loader)
+    print(f"Validation Loss: {avg_val_loss:.4f}")
+    return avg_val_loss
