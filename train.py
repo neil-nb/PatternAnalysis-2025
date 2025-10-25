@@ -145,3 +145,6 @@ def plot_losses(train_losses, val_losses):
     plt.grid(True)
     plt.savefig("loss_graph.png")
     plt.close()
+
+if __name__ == "__main__":
+    train_model()
