@@ -2,6 +2,7 @@ import torch
 from dataset import create_dataloaders
 from modules import ImprovedUNet
 import torch.nn.functional as F
+import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -29,6 +30,27 @@ def dice_loss_per_class(pred, target, num_classes, smooth=1):
     dice_score = (2. * intersection + smooth) / (pred_sum + target_sum + smooth)
     per_class_loss = 1 - dice_score.mean(dim=0)
     return per_class_loss
+
+def evaluate_model(model, data_loader, device, num_classes):
+    total_dice_per_class = np.zeros(num_classes)
+    batch_count = 0
+
+    with torch.no_grad():
+        for images, true_masks in data_loader:
+            images = images.to(device)
+            true_masks = true_masks.to(device)
+            pred_masks = model(images)
+            per_class_loss = dice_loss_per_class(pred_masks, true_masks, num_classes)
+            per_class_dice = 1 - per_class_loss.cpu().numpy()
+            total_dice_per_class += per_class_dice
+            batch_count += 1
+
+    average_dice_per_class = total_dice_per_class / batch_count
+    print(f"Average Dice Score per Class:")
+    for i, dice_score in enumerate(average_dice_per_class):
+        print(f"Class {i}: {dice_score:.4f}")
+    print(f"Overall Average Dice Score: {average_dice_per_class.mean():.4f}")
+
 
 if __name__ == "__main__":
     print("Hello, World!")
