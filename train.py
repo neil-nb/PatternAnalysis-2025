@@ -22,8 +22,8 @@ train_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
 test_images = "HipMRI_Study_open/keras_slices_data/keras_slices_test"
 test_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
 
-train_loader = create_dataloaders(train_images, train_masks, batch_size, normImage=True)
-val_loader = create_dataloaders(test_images, test_masks, batch_size, normImage=True)
+train_loader = create_dataloaders(train_images, train_masks, batch_size, standardize=True)
+val_loader = create_dataloaders(test_images, test_masks, batch_size, standardize=True)
 
 net = ImprovedUNet(num_classes=num_classes, base_ch=64, dropout_p=0.1, deep_supervision=True).to(device)
 

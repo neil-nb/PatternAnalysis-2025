@@ -54,7 +54,7 @@ def evaluate_model(model, data_loader, device, num_classes):
     print(f"Overall Average Dice Score: {average_dice_per_class.mean():.4f}")
 
 
-def visualize_predictions(model, data_loader, device, num_classes):
+def visualize_predictions(model, data_loader, device):
     dataset_size = len(data_loader.dataset)
     indices = random.sample(range(dataset_size), 3)
     samples = [data_loader.dataset[i] for i in indices]
