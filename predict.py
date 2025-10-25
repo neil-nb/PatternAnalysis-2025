@@ -85,4 +85,5 @@ def visualize_predictions(model, data_loader, device, num_classes):
         plt.close()
 
 if __name__ == "__main__":
-    print("Hello, World!")
+    evaluate_model(net, validation_loader, device, num_classes)
+    visualize_predictions(net, validation_loader, device, num_classes)
