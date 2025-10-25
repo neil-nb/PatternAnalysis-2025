@@ -3,12 +3,16 @@ import torch.nn as nn
 from modules import ImprovedUNet
 from dataset import create_dataloaders
 import torch.nn.functional as F
+import torch.optim as optim
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
 batch_size = 32
 num_classes = 6
+learning_rate = 3e-3
+num_epochs = 20
 
 # Dataset paths
 train_images = "HipMRI_Study_open/keras_slices_data/keras_slices_train"
@@ -55,3 +59,7 @@ class ComboLoss(nn.Module):
 
     def forward(self, logits, target):
         return self.alpha * self.dice(logits, target) + (1.0 - self.alpha) * self.ce(logits, target)
+    
+optimizer = optim.AdamW(net.parameters(), lr=learning_rate, weight_decay=1e-2)
+scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs, eta_min=1e-5)
+scaler = torch.amp.GradScaler("cuda", enabled=(device.type == "cuda"))
