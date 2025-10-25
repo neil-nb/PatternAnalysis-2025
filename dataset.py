@@ -50,7 +50,9 @@ class ProstateSegmentationDataset(Dataset):
 
         return image_tensor, mask_tensor
 
+def create_dataloaders(image_dir, mask_dir, batch_size, normImage=False):
+    dataset = ProstateSegmentationDataset(image_dir, mask_dir, normImage=normImage)
+    
+    loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    return loader
 
-def build_loader(img_dir, mask_dir, batch_size=4, standardise=False, output_shape=(256, 128), shuffle=True, num_workers=0):
-    dataset = ProstateSegmentationDataset(img_dir=img_dir, mask_dir=mask_dir, standardise=standardise, output_shape=output_shape)
-    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
