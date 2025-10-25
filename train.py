@@ -67,6 +67,7 @@ scaler = torch.amp.GradScaler("cuda", enabled=(device.type == "cuda"))
 criterion = ComboLoss(alpha=0.5)
 
 def train_model():
+    train_losses, val_losses = [], []
     print("Starting training\n")
     start_time = time.time()
 
@@ -100,8 +101,11 @@ def train_model():
                 print(f"Epoch [{epoch+1}/{num_epochs}], Batch [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
 
         avg_train_loss = epoch_loss / len(train_loader)
+        train_losses.append(avg_train_loss)
         print(f"Epoch {epoch+1}, Average Training Loss: {avg_train_loss:.4f}")
 
+        avg_val_loss = validate_model()
+        val_losses.append(avg_val_loss)
         scheduler.step()
 
     end_time = time.time()
