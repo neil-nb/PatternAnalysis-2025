@@ -81,10 +81,29 @@ class UpSampleBlock(nn.Module):
         self.attn = AttentionGate(skip_ch, out_ch, inter_ch=out_ch // 2) if use_attn else None
         self.fuse = ResidualBlock(out_ch + skip_ch, out_ch, dropout_p=dropout_p)
         self.scse = scSE(out_ch)
-        
+
     def forward(self, x, skip):
         x = self.up(x)
         if self.attn:
             skip = self.attn(skip, x)
         x = torch.cat([x, skip], dim=1)
         return self.scse(self.fuse(x))
+
+class ImprovedUNet(nn.Module):
+    def __init__(self, num_classes, base_ch=64, dropout_p=0.1, deep_supervision=True):
+        super().__init__()
+        self.deep_supervision = deep_supervision
+
+        self.e1 = nn.Sequential(ResidualBlock(1, base_ch, dropout_p), scSE(base_ch))
+        self.p1 = nn.MaxPool2d(2)
+
+        self.e2 = nn.Sequential(ResidualBlock(base_ch, base_ch*2, dropout_p), scSE(base_ch*2))
+        self.p2 = nn.MaxPool2d(2)
+
+        self.e3 = nn.Sequential(ResidualBlock(base_ch*2, base_ch*4, dropout_p), scSE(base_ch*4))
+        self.p3 = nn.MaxPool2d(2)
+
+        self.e4 = nn.Sequential(ResidualBlock(base_ch*4, base_ch*8, dropout_p), scSE(base_ch*8))
+        self.p4 = nn.MaxPool2d(2)
+
+        self.b = nn.Sequential(ResidualBlock(base_ch*8, base_ch*16, dropout_p), scSE(base_ch*16))
