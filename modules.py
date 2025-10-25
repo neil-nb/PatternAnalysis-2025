@@ -57,3 +57,19 @@ class scSE(nn.Module):
         
     def forward(self, x):
         return self.s(x) + self.c(x)
+
+class AttentionGate(nn.Module):
+    def __init__(self, in_ch_x, in_ch_g, inter_ch):
+        super().__init__()
+        self.theta_x = nn.Conv2d(in_ch_x, inter_ch, kernel_size=1, bias=False)
+        self.phi_g = nn.Conv2d(in_ch_g, inter_ch, kernel_size=1, bias=True)
+        self.psi = nn.Conv2d(inter_ch, 1, kernel_size=1, bias=True)
+        self.bn = nn.BatchNorm2d(inter_ch)
+        
+    def forward(self, x, g):
+        theta_x = self.theta_x(x)
+        phi_g = self.phi_g(g)
+        f = F.relu(self.bn(theta_x + phi_g))
+        att = torch.sigmoid(self.psi(f))
+        att = F.interpolate(att, size=x.shape[2:], mode="bilinear", align_corners=False)
+        return x * att
