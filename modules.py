@@ -117,3 +117,23 @@ class ImprovedUNet(nn.Module):
         self.aux2 = nn.Conv2d(base_ch*2, num_classes, kernel_size=1)
         self.aux3 = nn.Conv2d(base_ch*4, num_classes, kernel_size=1)
 
+    def forward(self, x):
+        e1 = self.e1(x); p1 = self.p1(e1)
+        e2 = self.e2(p1); p2 = self.p2(e2)
+        e3 = self.e3(p2); p3 = self.p3(e3)
+        e4 = self.e4(p3); p4 = self.p4(e4)
+
+        b = self.b(p4)
+
+        d4 = self.d4(b, e4)
+        d3 = self.d3(d4, e3)
+        d2 = self.d2(d3, e2)
+        d1 = self.d1(d2, e1)
+
+        out = self.out(d1)
+
+        if self.deep_supervision and self.training:
+            aux2 = F.interpolate(self.aux2(d2), size=out.shape[2:], mode="bilinear", align_corners=False)
+            aux3 = F.interpolate(self.aux3(d3), size=out.shape[2:], mode="bilinear", align_corners=False)
+            return out, aux2, aux3
+        return out
