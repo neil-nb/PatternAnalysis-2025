@@ -65,7 +65,7 @@ class AttentionGate(nn.Module):
         self.phi_g = nn.Conv2d(in_ch_g, inter_ch, kernel_size=1, bias=True)
         self.psi = nn.Conv2d(inter_ch, 1, kernel_size=1, bias=True)
         self.bn = nn.BatchNorm2d(inter_ch)
-        
+
     def forward(self, x, g):
         theta_x = self.theta_x(x)
         phi_g = self.phi_g(g)
@@ -73,3 +73,18 @@ class AttentionGate(nn.Module):
         att = torch.sigmoid(self.psi(f))
         att = F.interpolate(att, size=x.shape[2:], mode="bilinear", align_corners=False)
         return x * att
+    
+class UpSampleBlock(nn.Module):
+    def __init__(self, in_ch, skip_ch, out_ch, dropout_p=0.0, use_attn=True):
+        super().__init__()
+        self.up = nn.ConvTranspose2d(in_ch, out_ch, kernel_size=2, stride=2)
+        self.attn = AttentionGate(skip_ch, out_ch, inter_ch=out_ch // 2) if use_attn else None
+        self.fuse = ResidualBlock(out_ch + skip_ch, out_ch, dropout_p=dropout_p)
+        self.scse = scSE(out_ch)
+        
+    def forward(self, x, skip):
+        x = self.up(x)
+        if self.attn:
+            skip = self.attn(skip, x)
+        x = torch.cat([x, skip], dim=1)
+        return self.scse(self.fuse(x))
