@@ -81,9 +81,9 @@ def visualize_predictions(model, data_loader, device):
             ax.axis('off')
 
         plt.tight_layout()
-        plt.savefig(f'validation_{idx + 1}.png')
+        plt.savefig(f'images/validation_{idx + 1}.png')
         plt.close()
 
 if __name__ == "__main__":
     evaluate_model(net, validation_loader, device, num_classes)
-    visualize_predictions(net, validation_loader, device, num_classes)
+    visualize_predictions(net, validation_loader, device)

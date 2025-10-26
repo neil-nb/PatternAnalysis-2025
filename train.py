@@ -143,7 +143,7 @@ def plot_losses(train_losses, val_losses):
     plt.title("Training and Validation Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig("loss_graph.png")
+    plt.savefig("images/loss_graph.png")
     plt.close()
 
 if __name__ == "__main__":
