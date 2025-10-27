@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 num_classes = 6
 learning_rate = 3e-3
-num_epochs = 20
+num_epochs = 25
 
 # Dataset paths
 train_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_train"
