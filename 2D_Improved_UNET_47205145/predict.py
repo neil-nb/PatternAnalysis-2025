@@ -104,9 +104,9 @@ def model_evaluation(model, data_loader, device, num_classes, save_path="2D_Impr
 
     return mean_dice_per_class, overall_dice
 
-def display_predictions(model, data_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images"):
+def save_predictions(model, data_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images"):
     """
-    Save side-by-side visualisations of MRI slices with true and predicted masks.
+    Generate and save visualisations of model predictions alongside input images and ground truth masks.
 
     Args:
         model (torch.nn.Module): The trained segmentation network.
@@ -137,27 +137,13 @@ def display_predictions(model, data_loader, device, num_samples=3, save_dir="2D_
         img_array = img_tensor.squeeze().cpu().numpy()
         true_array = mask_tensor.squeeze().cpu().numpy()
 
-        # Plot all three panels
-        figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(11, 3.8))
-        display_titles = ["Input MRI Slice", "Ground Truth", "Model Prediction"]
-        content = [img_array, true_array, prediction_mask]
-
-        for axis, content_img, title in zip(axes, content, display_titles):
-            axis.imshow(content_img, cmap="gray")
-            axis.set_title(title, fontsize=10)
-            axis.axis("off")
-
-        # Layout tuning
-        figure.subplots_adjust(wspace=0.04, top=0.83, bottom=0.07)
-        figure.suptitle(f"Example {idx}", fontsize=12, weight="bold")
-
-        # Save figure
-        file_path = os.path.join(save_dir, f"prediction_img_{idx}.png")
-        figure.savefig(file_path, dpi=300, bbox_inches="tight", pad_inches=0.03)
-        plt.close(figure)
+        # Save images
+        plt.imsave(os.path.join(save_dir, f"mri_slice_{idx}.png"), img_array, cmap="gray")
+        plt.imsave(os.path.join(save_dir, f"ground_truth_{idx}.png"), true_array, cmap="gray")
+        plt.imsave(os.path.join(save_dir, f"model_prediction_{idx}.png"), prediction_mask, cmap="gray")
 
 
 # Main
 if __name__ == "__main__":
     model_evaluation(net, validation_loader, device, num_classes)
-    display_predictions(net, validation_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images")
+    save_predictions(net, validation_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images")
