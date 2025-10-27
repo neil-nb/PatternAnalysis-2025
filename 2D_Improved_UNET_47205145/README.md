@@ -24,3 +24,27 @@ Preprocessing and loading are handled in `dataset.py`:
 - Images and masks are read from `.nii` or `.nii.gz` files using NiBabel.  
 - Images are standardised and resized to 256×128.  
 - Data is returned as tensors compatible with PyTorch.  
+
+## Training
+
+Training is managed through `train.py`, which defines the learning process, loss functions, and evaluation metrics.
+
+Key components:
+- Loss Function: `ComboLoss`, combining `Generalised Dice Loss` and `Cross-Entropy Loss` to handle class imbalance and overlap accuracy.  
+- Optimiser: `AdamW` with cosine annealing learning rate scheduling.  
+- Mixed Precision Training: enabled when using CUDA for efficiency.  
+- Regularisation: dropout and gradient clipping (max norm 1.0).  
+- Deep Supervision: auxiliary losses from intermediate decoder layers.  
+
+Training parameters:
+- Batch size: 32  
+- Epochs: 25  
+- Learning rate: 3e-3  
+- Weight decay: 1e-2  
+- Base channels: 64  
+- Dropout: 0.1  
+
+Training and validation losses are plotted over epochs and saved as:
+
+<!-- ![Training and Validation Loss](images/loss_curve.png) -->
+[INSERT IMAGE HERE]
