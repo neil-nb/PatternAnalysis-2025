@@ -1,20 +1,9 @@
-# Pattern Analysis
-Pattern Analysis of various datasets by COMP3710 students in 2025 at the University of Queensland.
+# 2D Improved U-Net for Prostate MRI Segmentation
+Student Number: 47205145 \
+Name: Neil Barigye
 
-We create pattern recognition and image processing library for Tensorflow (TF), PyTorch or JAX.
+## Overview
+This project implements an Improved U-Net for 2D segmentation of the HipMRI Prostate Cancer dataset, which corresponds to Project 3 (Normal Difficulty).  
+The model enhances the original U-Net architecture by incorporating residual connections, spatial and channel squeeze-and-excitation (scSE) modules, and attention gates to improve feature representation and segmentation accuracy.  
 
-This library is created and maintained by The University of Queensland [COMP3710](https://my.uq.edu.au/programs-courses/course.html?course_code=comp3710) students.
-
-The library includes the following implemented in Tensorflow:
-* fractals 
-* recognition problems
-
-In the recognition folder, you will find many recognition problems solved including:
-* segmentation
-* classification
-* graph neural networks
-* StyleGAN
-* Stable diffusion
-* transformers
-etc.
 
