@@ -18,10 +18,10 @@ learning_rate = 3e-3
 num_epochs = 20
 
 # Dataset paths
-train_images = "HipMRI_Study_open/keras_slices_data/keras_slices_train"
-train_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
-test_images = "HipMRI_Study_open/keras_slices_data/keras_slices_test"
-test_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
+train_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_train"
+train_masks = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
+test_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_test"
+test_masks = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
 
 # Load data
 train_loader = create_dataloaders(train_images, train_masks, batch_size, standardize=True)
@@ -171,7 +171,7 @@ def plot_losses(train_losses, val_losses):
     plt.title("Training and Validation Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig("images/loss_graph.png")
+    plt.savefig("2D_Improved_UNET_47205145/images/loss_graph.png")
     plt.close()
 
 # Main
