@@ -141,7 +141,7 @@ def train():
         scheduler.step()
 
     # Save final model weights and training curve
-    torch.save(net.state_dict(), "model.pth")
+    torch.save(net.state_dict(), "2D_Improved_UNET_47205145/model.pth")
     loss_plot(history_train, history_val, smooth_window=3, save_path="2D_Improved_UNET_47205145/images/loss_curve.png")
 
 
