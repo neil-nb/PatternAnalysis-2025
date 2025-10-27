@@ -191,6 +191,7 @@ def loss_plot(train_losses, val_losses, smooth_window=3, save_path="2D_Improved_
     ax.set_ylabel("Loss", fontsize=12)
     ax.legend(frameon=False)
     ax.grid(alpha=0.3)
+    ax.xaxis.get_major_locator().set_params(integer=True)
 
     # Save and close
     fig.tight_layout()
