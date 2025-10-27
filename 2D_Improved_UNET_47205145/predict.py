@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Hyperparameters
 batch_size = 64
 num_classes = 6
-model_path = "model.pth"
+model_path = "2D_Improved_UNET_47205145/model.pth"
 
 # Dataset paths
 validate_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_validate"
