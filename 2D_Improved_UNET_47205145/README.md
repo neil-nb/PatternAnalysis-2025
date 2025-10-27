@@ -48,3 +48,15 @@ Training and validation losses are plotted over epochs and saved as:
 
 <!-- ![Training and Validation Loss](images/loss_curve.png) -->
 [INSERT IMAGE HERE]
+
+## Evaluation
+
+Evaluation is performed using `predict.py`.  
+The model's predictions are compared to ground truth labels using `Dice similarity coefficients`.  
+The script also produces visual comparisons between input images, true masks, and predicted masks.
+
+### Results
+The model achieved strong segmentation performance across all classes, indicating robust generalisation to unseen slices.
+
+<!-- ![Performance Results](images/performance.jpg) -->
+[INSERT IMAGE HERE]
