@@ -1,3 +1,4 @@
+import os
 import torch
 from dataset import create_dataloaders
 from modules import ImprovedUNet
@@ -26,7 +27,7 @@ net = ImprovedUNet(num_classes=num_classes, deep_supervision=False).to(device)
 net.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
 net.eval()
 
-def dice_loss_per_class(pred, target, num_classes, smooth=1):
+def compute_loss(pred, target, num_classes, smooth=1):
     """Calculate Dice loss for each class separately.
     Args:
         pred (torch.Tensor): Predicted logits from the model of shape [batch_size, num_classes, H, W].
@@ -45,71 +46,118 @@ def dice_loss_per_class(pred, target, num_classes, smooth=1):
     per_class_loss = 1 - dice_score.mean(dim=0)
     return per_class_loss
 
-def evaluate_model(model, data_loader, device, num_classes):
-    """Evaluate the model on the validation dataset and print Dice scores per class.
-    Args:
-        model (torch.nn.Module): The trained segmentation model.
-        data_loader (DataLoader): DataLoader for the validation dataset.
-        device (torch.device): Device to run the evaluation on.
-        num_classes (int): Number of segmentation classes.
+def model_evaluation(model, data_loader, device, num_classes, save_path="2D_Improved_UNET_47205145/images/dice_scores.png"):
     """
-    total_dice_per_class = np.zeros(num_classes)
-    batch_count = 0
+    Evaluate the segmentation model and plot average Dice scores per anatomical class.
+
+    Args:
+        model (torch.nn.Module): Trained segmentation model.
+        data_loader (torch.utils.data.DataLoader): Validation dataset loader.
+        device (torch.device): Computation device (CPU or CUDA).
+        num_classes (int): Total number of segmentation classes.
+        save_path (str): File path for saving the bar chart.
+    """
+    class_labels = ["Background", "Body Outline", "Bone", "Bladder", "Rectum", "Prostate"]
+
+    model.eval()
+    dice_sums = np.zeros(num_classes, dtype=np.float64)
+    num_batches = 0
 
     with torch.no_grad():
-        for images, true_masks in data_loader:
-            images = images.to(device)
-            true_masks = true_masks.to(device)
-            pred_masks = model(images)
-            per_class_loss = dice_loss_per_class(pred_masks, true_masks, num_classes)
-            per_class_dice = 1 - per_class_loss.cpu().numpy()
-            total_dice_per_class += per_class_dice
-            batch_count += 1
+        for images, masks in data_loader:
+            images, masks = images.to(device), masks.to(device)
 
-    average_dice_per_class = total_dice_per_class / batch_count
-    print(f"Average Dice Score per Class:")
-    for i, dice_score in enumerate(average_dice_per_class):
-        print(f"Class {i}: {dice_score:.4f}")
-    print(f"Overall Average Dice Score: {average_dice_per_class.mean():.4f}")
+            outputs = model(images)
+            if isinstance(outputs, tuple):  # handle deep supervision
+                outputs = outputs[0]
 
+            per_class_dice = 1 - compute_loss(outputs, masks, num_classes).cpu().numpy()
+            dice_sums += per_class_dice
+            num_batches += 1
 
-def visualize_predictions(model, data_loader, device):
-    """Visualize and save predictions from the model alongside true masks.
-    Args:
-        model (torch.nn.Module): The trained segmentation model.
-        data_loader (DataLoader): DataLoader for the validation dataset.
-        device (torch.device): Device to run the evaluation on.
+    mean_dice_per_class = dice_sums / max(num_batches, 1)
+    overall_dice = mean_dice_per_class.mean()
+
+    # Create directory if missing
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # Plot bar chart
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(class_labels, mean_dice_per_class, color="skyblue", edgecolor="black")
+    plt.axhline(y=overall_dice, color="red", linestyle="--", linewidth=1.2, label=f"Mean Dice: {overall_dice:.4f}")
+
+    # Annotate values on bars
+    for bar, score in zip(bars, mean_dice_per_class):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.01, f"{score:.3f}",
+                 ha="center", va="bottom", fontsize=9)
+
+    plt.title("Average Dice Score per Anatomical Class", fontsize=13, fontweight="bold")
+    plt.xlabel("Anatomical Structure", fontsize=11)
+    plt.ylabel("Dice Score", fontsize=11)
+    plt.ylim(0, 1.05)
+    plt.legend(frameon=False)
+    plt.grid(axis="y", linestyle="--", alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+
+    return mean_dice_per_class, overall_dice
+
+def display_predictions(model, data_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images"):
     """
-    dataset_size = len(data_loader.dataset)
-    indices = random.sample(range(dataset_size), 3)
-    samples = [data_loader.dataset[i] for i in indices]
+    Save side-by-side visualisations of MRI slices with true and predicted masks.
 
-    for idx, (image, true_mask) in enumerate(samples):
-        image = image.unsqueeze(0).to(device)
-        true_mask = true_mask.squeeze().cpu().numpy()
+    Args:
+        model (torch.nn.Module): The trained segmentation network.
+        data_loader (torch.utils.data.DataLoader): DataLoader containing validation data.
+        device (torch.device): Hardware device used for inference.
+        num_samples (int): Number of random examples to generate visualisations for.
+        save_dir (str): Directory path where output figures will be saved.
+    """
+    os.makedirs(save_dir, exist_ok=True)
+    model.eval()
 
+    dataset = data_loader.dataset
+    total_items = len(dataset)
+    chosen_indices = random.sample(range(total_items), min(num_samples, total_items))
+
+    for idx, data_index in enumerate(chosen_indices, start=1):
+        img_tensor, mask_tensor = dataset[data_index]
+        img_batch = img_tensor.unsqueeze(0).to(device)
+
+        # Run model inference
         with torch.no_grad():
-            pred_mask = model(image)
-            if isinstance(pred_mask, tuple):
-                pred_mask = pred_mask[0]
-            pred_mask = torch.argmax(pred_mask, dim=1).squeeze().cpu().numpy()
+            prediction = model(img_batch)
+            if isinstance(prediction, tuple):  # for deep supervision models
+                prediction = prediction[0]
+            prediction_mask = torch.argmax(prediction, dim=1).squeeze().cpu().numpy()
 
-        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-        axes[0].imshow(image.squeeze().cpu().numpy(), cmap='gray')
-        axes[0].set_title("Original Image")
-        axes[1].imshow(true_mask, cmap='gray')
-        axes[1].set_title("True Segmentation")
-        axes[2].imshow(pred_mask, cmap='gray')
-        axes[2].set_title("Predicted Segmentation")
+        # Convert tensors to NumPy arrays for display
+        img_array = img_tensor.squeeze().cpu().numpy()
+        true_array = mask_tensor.squeeze().cpu().numpy()
 
-        for ax in axes:
-            ax.axis('off')
+        # Plot all three panels
+        figure, axes = plt.subplots(nrows=1, ncols=3, figsize=(11, 3.8))
+        display_titles = ["Input MRI Slice", "Ground Truth", "Model Prediction"]
+        content = [img_array, true_array, prediction_mask]
 
-        plt.tight_layout()
-        plt.savefig(f'2D_Improved_UNET_47205145/images/validation_{idx + 1}.png')
-        plt.close()
+        for axis, content_img, title in zip(axes, content, display_titles):
+            axis.imshow(content_img, cmap="gray")
+            axis.set_title(title, fontsize=10)
+            axis.axis("off")
+
+        # Layout tuning
+        figure.subplots_adjust(wspace=0.04, top=0.83, bottom=0.07)
+        figure.suptitle(f"Example {idx}", fontsize=12, weight="bold")
+
+        # Save figure
+        file_path = os.path.join(save_dir, f"prediction_img_{idx}.png")
+        figure.savefig(file_path, dpi=300, bbox_inches="tight", pad_inches=0.03)
+        plt.close(figure)
+
 
 # Main
 if __name__ == "__main__":
-    evaluate_model(net, validation_loader, device, num_classes)
-    visualize_predictions(net, validation_loader, device)
+    model_evaluation(net, validation_loader, device, num_classes)
+    display_predictions(net, validation_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images")

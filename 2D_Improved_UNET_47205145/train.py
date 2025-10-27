@@ -5,8 +5,8 @@ from dataset import create_dataloaders
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
-import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,7 +30,7 @@ val_loader = create_dataloaders(test_images, test_masks, batch_size, standardize
 # Model setup
 net = ImprovedUNet(num_classes=num_classes, base_ch=64, dropout_p=0.1, deep_supervision=True).to(device)
 
-def init_weights(m):
+def initialize_weights(m):
     """Initialize weights of convolutional layers using Kaiming normal initialization.
      Args:
          m (nn.Module): A module in the neural network.
@@ -41,7 +41,7 @@ def init_weights(m):
             nn.init.constant_(m.bias, 0)
 
 # Apply weight initialization
-net.apply(init_weights)
+net.apply(initialize_weights)
 
 
 # Loss functions
@@ -89,59 +89,63 @@ scaler = torch.amp.GradScaler("cuda", enabled=(device.type == "cuda"))
 criterion = ComboLoss(alpha=0.5)
 
 # Training and validation loops
-def train_model():
-    """Train the Improved UNet model."""
-    train_losses, val_losses = [], []
-    print("Starting training\n")
-    start_time = time.time()
+def train():
+    """
+    Executes the training loop for the Improved U-Net model, recording training and validation losses.
+    """
+    history_train, history_val = [], []
+    print("Beginning model optimisation...\n")
 
-    for epoch in range(num_epochs):
+    for epoch_idx in range(num_epochs):
         net.train()
-        epoch_loss = 0.0
+        running_total, batch_counter = 0.0, 0
 
-        for i, (images, masks) in enumerate(train_loader):
-            images, masks = images.to(device), masks.to(device)
+        for batch_idx, (x_batch, y_batch) in enumerate(train_loader, start=1):
+            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
             optimizer.zero_grad(set_to_none=True)
 
-            # Forward pass with mixed precision
-            with torch.amp.autocast("cuda", enabled=(device.type == "cuda")):
-                outputs = net(images)
-                if isinstance(outputs, tuple):
-                    main, aux2, aux3 = outputs
-                    loss_main = criterion(main, masks.squeeze(1))
-                    loss_aux2 = criterion(aux2, masks.squeeze(1))
-                    loss_aux3 = criterion(aux3, masks.squeeze(1))
-                    loss = 0.6 * loss_main + 0.25 * loss_aux2 + 0.15 * loss_aux3
+            # Forward and backward passes with mixed precision
+            with torch.amp.autocast(device_type="cuda", enabled=(device.type == "cuda")):
+                predictions = net(x_batch)
+                if isinstance(predictions, tuple):
+                    primary, aux_1, aux_2 = predictions
+                    main_loss = criterion(primary, y_batch.squeeze(1))
+                    aux_loss_1 = criterion(aux_1, y_batch.squeeze(1))
+                    aux_loss_2 = criterion(aux_2, y_batch.squeeze(1))
+                    total_loss = (0.6 * main_loss) + (0.25 * aux_loss_1) + (0.15 * aux_loss_2)
                 else:
-                    loss = criterion(outputs, masks.squeeze(1))
+                    total_loss = criterion(predictions, y_batch.squeeze(1))
 
-            # Backward pass and optimization
-            scaler.scale(loss).backward()
+            # Gradient computation and update
+            scaler.scale(total_loss).backward()
             torch.nn.utils.clip_grad_norm_(net.parameters(), max_norm=1.0)
             scaler.step(optimizer)
             scaler.update()
 
-            epoch_loss += loss.item()
+            running_total += total_loss.item()
+            batch_counter += 1
 
-            if (i + 1) % batch_size == 0:
-                print(f"Epoch [{epoch+1}/{num_epochs}], Batch [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
+            # Periodic console feedback
+            if batch_idx % 10 == 0:
+                print(f"Epoch {epoch_idx+1}/{num_epochs} | Batch {batch_idx}/{len(train_loader)} "
+                      f"| Current Loss: {total_loss.item():.4f}")
 
-        avg_train_loss = epoch_loss / len(train_loader)
-        train_losses.append(avg_train_loss)
-        print(f"Epoch {epoch+1}, Average Training Loss: {avg_train_loss:.4f}")
+        # End-of-epoch metrics
+        mean_train_loss = running_total / max(batch_counter, 1)
+        history_train.append(mean_train_loss)
+        print(f"Epoch {epoch_idx+1}: Average Training Loss = {mean_train_loss:.4f}")
 
-        avg_val_loss = validate_model()
-        val_losses.append(avg_val_loss)
+        # Validation
+        val_loss = validate()
+        history_val.append(val_loss)
         scheduler.step()
 
-    end_time = time.time()
-    print("\nFinished Training")
-    print(f"Total training time: {end_time - start_time:.2f} seconds")
-
+    # Save final model weights and training curve
     torch.save(net.state_dict(), "model.pth")
-    plot_losses(train_losses, val_losses)
+    loss_plot(history_train, history_val, smooth_window=3, save_path="2D_Improved_UNET_47205145/images/loss_curve.png")
 
-def validate_model():
+
+def validate():
     """Validate the model on the validation dataset."""
     net.eval()
     val_loss = 0.0
@@ -160,20 +164,39 @@ def validate_model():
     print(f"Validation Loss: {avg_val_loss:.4f}")
     return avg_val_loss
 
-def plot_losses(train_losses, val_losses):
-    """Plot training and validation losses."""
-    epochs = range(1, len(train_losses) + 1)
-    plt.figure(figsize=(10, 6))
-    plt.plot(epochs, train_losses, "b", label="Training Loss")
-    plt.plot(epochs, val_losses, "r", label="Validation Loss")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.title("Training and Validation Loss")
-    plt.legend()
-    plt.grid(True)
-    plt.savefig("2D_Improved_UNET_47205145/images/loss_graph.png")
-    plt.close()
+def loss_plot(train_losses, val_losses, smooth_window=3, save_path="2D_Improved_UNET_47205145/images/loss.png"):
+    """Plot and save smoothed training and validation losses over epochs."""
+    
+    def smooth(values, window):
+        """Apply simple moving average smoothing."""
+        if window < 2 or len(values) < window:
+            return values
+        kernel = np.ones(window) / window
+        return np.convolve(values, kernel, mode="valid")
+
+    # Prepare data
+    epochs = np.arange(1, len(train_losses) + 1)
+    train_smooth = smooth(train_losses, smooth_window)
+    val_smooth = smooth(val_losses, smooth_window)
+    offset = len(epochs) - len(train_smooth)
+
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(epochs[offset:], train_smooth, color="steelblue", linewidth=2, label="Training Loss")
+    ax.plot(epochs[offset:], val_smooth, color="indianred", linewidth=2, label="Validation Loss")
+
+    # Format plot
+    ax.set_title("Training and Validation Loss", fontsize=14, weight="bold")
+    ax.set_xlabel("Epoch", fontsize=12)
+    ax.set_ylabel("Loss", fontsize=12)
+    ax.legend(frameon=False)
+    ax.grid(alpha=0.3)
+
+    # Save and close
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=300)
+    plt.close(fig)
 
 # Main
 if __name__ == "__main__":
-    train_model()
+    train()
