@@ -106,7 +106,9 @@ def create_dataloaders(image_dir, mask_dir, batch_size, standardize=False):
     Returns:
         torch.utils.data.DataLoader: DataLoader instance.
     """
+    # Initialize the dataset
     dataset = ProstateSegmentationDataset(image_dir, mask_dir, standardize=standardize)
+    # Create data loaders
     loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return loader
 
