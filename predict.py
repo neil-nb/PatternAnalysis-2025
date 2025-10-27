@@ -6,22 +6,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
+# Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Hyperparameters
 batch_size = 64
 num_classes = 6
 model_path = "model.pth"
 
+# Dataset paths
 validate_images = "HipMRI_Study_open/keras_slices_data/keras_slices_validate"
 validate_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_validate"
 
+# Load validation data
 validation_loader = create_dataloaders(validate_images, validate_masks, batch_size, standardize=True)
 
+# Load the trained model
 net = ImprovedUNet(num_classes=num_classes, deep_supervision=False).to(device)
 net.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
 net.eval()
 
 def dice_loss_per_class(pred, target, num_classes, smooth=1):
+    """Calculate Dice loss for each class separately.
+    Args:
+        pred (torch.Tensor): Predicted logits from the model of shape [batch_size, num_classes, H, W].
+        target (torch.Tensor): Ground truth masks of shape [batch_size, H, W].
+        num_classes (int): Number of segmentation classes.
+        smooth (float): Smoothing factor to avoid division by zero.
+    """
     pred = F.softmax(pred, dim=1)
     target = target.squeeze(dim=1) if target.dim() == 4 else target
     target_flat = F.one_hot(target, num_classes=num_classes).permute(0, 3, 1, 2).contiguous().view(pred.shape[0], num_classes, -1)
@@ -34,6 +46,13 @@ def dice_loss_per_class(pred, target, num_classes, smooth=1):
     return per_class_loss
 
 def evaluate_model(model, data_loader, device, num_classes):
+    """Evaluate the model on the validation dataset and print Dice scores per class.
+    Args:
+        model (torch.nn.Module): The trained segmentation model.
+        data_loader (DataLoader): DataLoader for the validation dataset.
+        device (torch.device): Device to run the evaluation on.
+        num_classes (int): Number of segmentation classes.
+    """
     total_dice_per_class = np.zeros(num_classes)
     batch_count = 0
 
@@ -55,6 +74,12 @@ def evaluate_model(model, data_loader, device, num_classes):
 
 
 def visualize_predictions(model, data_loader, device):
+    """Visualize and save predictions from the model alongside true masks.
+    Args:
+        model (torch.nn.Module): The trained segmentation model.
+        data_loader (DataLoader): DataLoader for the validation dataset.
+        device (torch.device): Device to run the evaluation on.
+    """
     dataset_size = len(data_loader.dataset)
     indices = random.sample(range(dataset_size), 3)
     samples = [data_loader.dataset[i] for i in indices]
@@ -84,6 +109,7 @@ def visualize_predictions(model, data_loader, device):
         plt.savefig(f'images/validation_{idx + 1}.png')
         plt.close()
 
+# Main
 if __name__ == "__main__":
     evaluate_model(net, validation_loader, device, num_classes)
     visualize_predictions(net, validation_loader, device)
