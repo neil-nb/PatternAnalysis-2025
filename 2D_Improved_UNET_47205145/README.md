@@ -22,10 +22,19 @@ The model is implemented in `modules.py` under the class `ImprovedUNet`.
 
 ### Data
 The model is trained on 2D MRI slices and corresponding segmentation masks from the HipMRI Study on Prostate Cancer.  
+
+#### Preprocessing
 Preprocessing and loading are handled in `dataset.py`:
 - Images and masks are read from `.nii` or `.nii.gz` files using NiBabel.  
-- Images are standardised and resized to 256×128.  
+- Images are standardised and resized to `256×128`.  
 - Data is returned as tensors compatible with PyTorch.  
+
+#### Data splits:
+
+- `train.py` uses `keras_slices_train` and `keras_slices_seg_train` for training.
+- `keras_slices_test` and `keras_slices_seg_test` are used for validation.
+- `predict.py` uses the `keras_slices_validate set` for evaluation and visualisation.
+These splits follow the official (given) HipMRI dataset partitions to ensure reproducibility and fair comparison.
 
 ## Training
 
