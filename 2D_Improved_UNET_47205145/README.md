@@ -59,6 +59,7 @@ Training and validation losses are plotted over epochs and saved as:
 
 ![Training and Validation Loss](images/loss_curve.png)
 
+Command to train: python train.py
 
 ## Evaluation
 
@@ -67,10 +68,13 @@ The model's predictions are compared to ground truth labels using `Dice similari
 The script also produces visual comparisons between input images, true masks, and predicted masks.
 
 ### Results
-The model achieved strong segmentation performance across all classes, indicating robust generalisation to unseen slices.
+The Improved U-Net achieved robust segmentation performance across all anatomical classes, showing effective localisation of the prostate and surrounding organs.
+Quantitatively, average Dice scores across classes were in the range of 0.825-0.994, with the bladder and background being the least and most accurately predicted classes respectively.
+These results demonstrate that the architectural improvements enhance feature learning and generalisation to unseen slices.
 
 ![Performance Results](images/dice_scores.png)
 
+Command to evaluate: python predict.py
 
 ## Visual Results
 
