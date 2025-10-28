@@ -4,6 +4,8 @@ Name: Neil Barigye
 
 ## Overview
 This project implements an Improved U-Net for 2D segmentation of the HipMRI Prostate Cancer dataset, which corresponds to Project 3 (Normal Difficulty).  
+The goal is to segment the prostate and surrounding organs (body outline, bone, bladder, rectum, and prostate) from MRI slices to support radiotherapy treatment planning and anatomical analysis.
+
 The model enhances the original U-Net architecture by incorporating residual connections, spatial and channel squeeze-and-excitation (scSE) modules, and attention gates to improve feature representation and segmentation accuracy.  
 
 
