@@ -18,10 +18,10 @@ learning_rate = 3e-3
 num_epochs = 25
 
 # Dataset paths
-train_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_train"
-train_masks = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
-test_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_test"
-test_masks = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
+train_images = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_train"
+train_masks = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
+test_images = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_test"
+test_masks = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
 
 # Load data
 train_loader = create_dataloaders(train_images, train_masks, batch_size, standardize=True)
@@ -141,8 +141,8 @@ def train():
         scheduler.step()
 
     # Save final model weights and training curve
-    torch.save(net.state_dict(), "2D_Improved_UNET_47205145/model.pth")
-    loss_plot(history_train, history_val, smooth_window=3, save_path="2D_Improved_UNET_47205145/images/loss_curve.png")
+    torch.save(net.state_dict(), "model.pth")
+    loss_plot(history_train, history_val, smooth_window=3, save_path="images/loss_curve.png")
 
 
 def validate():
@@ -164,7 +164,7 @@ def validate():
     print(f"Validation Loss: {avg_val_loss:.4f}")
     return avg_val_loss
 
-def loss_plot(train_losses, val_losses, smooth_window=3, save_path="2D_Improved_UNET_47205145/images/loss.png"):
+def loss_plot(train_losses, val_losses, smooth_window=3, save_path="images/loss.png"):
     """Plot and save smoothed training and validation losses over epochs."""
     
     def smooth(values, window):

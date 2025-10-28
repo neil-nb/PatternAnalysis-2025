@@ -13,11 +13,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Hyperparameters
 batch_size = 64
 num_classes = 6
-model_path = "2D_Improved_UNET_47205145/model.pth"
+model_path = "model.pth"
 
 # Dataset paths
-validate_images = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_validate"
-validate_masks = "2D_Improved_UNET_47205145/HipMRI_Study_open/keras_slices_data/keras_slices_seg_validate"
+validate_images = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_validate"
+validate_masks = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_seg_validate"
 
 # Load validation data
 validation_loader = create_dataloaders(validate_images, validate_masks, batch_size, standardize=True)
@@ -46,7 +46,7 @@ def compute_loss(pred, target, num_classes, smooth=1):
     per_class_loss = 1 - dice_score.mean(dim=0)
     return per_class_loss
 
-def model_evaluation(model, data_loader, device, num_classes, save_path="2D_Improved_UNET_47205145/images/dice_scores.png"):
+def model_evaluation(model, data_loader, device, num_classes, save_path="images/dice_scores.png"):
     """
     Evaluate the segmentation model and plot average Dice scores per anatomical class.
 
@@ -104,7 +104,7 @@ def model_evaluation(model, data_loader, device, num_classes, save_path="2D_Impr
 
     return mean_dice_per_class, overall_dice
 
-def save_predictions(model, data_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images"):
+def save_predictions(model, data_loader, device, num_samples=3, save_dir="images"):
     """
     Generate and save visualisations of model predictions alongside input images and ground truth masks.
 
@@ -146,4 +146,4 @@ def save_predictions(model, data_loader, device, num_samples=3, save_dir="2D_Imp
 # Main
 if __name__ == "__main__":
     model_evaluation(net, validation_loader, device, num_classes)
-    save_predictions(net, validation_loader, device, num_samples=3, save_dir="2D_Improved_UNET_47205145/images")
+    save_predictions(net, validation_loader, device, num_samples=3, save_dir="images")
