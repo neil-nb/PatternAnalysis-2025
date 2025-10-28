@@ -46,8 +46,8 @@ Training parameters:
 
 Training and validation losses are plotted over epochs and saved as:
 
-<!-- ![Training and Validation Loss](images/loss_curve.png) -->
-[INSERT IMAGE HERE]
+![Training and Validation Loss](images/loss_curve.png)
+
 
 ## Evaluation
 
@@ -58,5 +58,4 @@ The script also produces visual comparisons between input images, true masks, an
 ### Results
 The model achieved strong segmentation performance across all classes, indicating robust generalisation to unseen slices.
 
-<!-- ![Performance Results](images/performance.jpg) -->
-[INSERT IMAGE HERE]
+![Performance Results](images/dice_scores.png)
