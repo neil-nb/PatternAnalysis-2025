@@ -59,3 +59,15 @@ The script also produces visual comparisons between input images, true masks, an
 The model achieved strong segmentation performance across all classes, indicating robust generalisation to unseen slices.
 
 ![Performance Results](images/dice_scores.png)
+
+
+## Visual Results
+
+Below are some example qualitative results on validation data:
+
+| Original | Ground Truth | Prediction |
+|:--:|:--:|:--:|
+| ![MRI Slice](images/mri_slice_1.png) | ![Ground Truth](images/ground_truth_1.png) | ![Model Prediction](images/model_prediction_1.png) |
+| ![MRI Slice](images/mri_slice_2.png) | ![Ground Truth](images/ground_truth_2.png) | ![Model Prediction](images/model_prediction_2.png) |
+| ![MRI Slice](images/mri_slice_3.png) | ![Ground Truth](images/ground_truth_3.png) | ![Model Prediction](images/model_prediction_3.png) |
+
