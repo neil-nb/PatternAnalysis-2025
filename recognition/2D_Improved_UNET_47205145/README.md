@@ -118,6 +118,23 @@ Below are some example qualitative results on validation data:
 | ![MRI Slice](images/mri_slice_2.png) | ![Ground Truth](images/ground_truth_2.png) | ![Model Prediction](images/model_prediction_2.png) |
 | ![MRI Slice](images/mri_slice_3.png) | ![Ground Truth](images/ground_truth_3.png) | ![Model Prediction](images/model_prediction_3.png) |
 
+## Dependencies
+
+| Package | Version | Purpose |
+|----------|----------|----------|
+| **Python** | ≥3.9 | Core language |
+| **PyTorch** | ≥2.1 | Deep learning framework |
+| **Torchvision** | ≥0.16 | Optional utilities for PyTorch models |
+| **NumPy** | ≥1.24 | Array manipulation and numerical operations |
+| **NiBabel** | ≥5.0 | Loading and handling medical NIfTI (.nii/.nii.gz) files |
+| **Matplotlib** | ≥3.8 | Plotting training curves and visualising results |
+| **tqdm** | ≥4.66 | Optional (for progress bars during data loading or training) |
+
+To install all required packages:
+```bash
+pip install torch torchvision nibabel numpy matplotlib tqdm
+```
+
 ## References
 F. Isensee, P. Kickingereder, W. Wick, M. Bendszus, and K. H. Maier-Hein, “Brain Tumor Segmentation and Radiomics Survival Prediction: Contribution to the BRATS 2017 Challenge,” Feb. 28, 2018, arXiv: arXiv:1802.10508. doi: 10.48550/arXiv.1802.10508. \
 L. Rundo et al., “USE-Net: Incorporating Squeeze-and-Excitation blocks into U-Net for prostate zonal segmentation of multi-institutional MRI datasets,” Neurocomputing, vol. 365, pp. 31–43, Nov. 2019, doi: 10.1016/j.neucom.2019.07.006. \
