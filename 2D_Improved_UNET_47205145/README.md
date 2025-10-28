@@ -18,6 +18,7 @@ The Improved U-Net (pictured below) builds upon the original U-Net architecture,
 
 
 The Improved U-Net integrates several mechanisms that enhance learning stability, feature selectivity, and representational capacity:
+
 #### Residual Blocks
 Instead of plain convolutional pairs, each block includes a residual shortcut that adds the input to the output of two convolutional layers.
 
@@ -35,7 +36,13 @@ The scSE mechanism combines two complementary forms of attention:
 Together, they improve feature recalibration by focussing the model only on relevant anatomical structures and suppressing background noise. 
 
 #### Attention Gates
-Attention gates are applied to skip connections before feature concatenation in the decoder. They learn to selectively pass information from the encoder, conditioning it on the decoder’s current context. This ensures: Only relevant encoder features are merged, preventing irrelevant background activations from propagating. Enhanced localisation accuracy near structure boundaries. This mechanism is inspired by the Attention U-Net model and improves segmentation quality in complex or low-contrast regions.
+Attention gates are applied to skip connections before feature concatenation in the decoder. They learn to selectively pass information from the encoder, conditioning it on the decoder’s current context. 
+
+This ensures: 
+- Only relevant encoder features are merged, preventing irrelevant background activations from propagating. 
+- Enhanced localisation accuracy near structure boundaries. 
+
+This mechanism is inspired by the Attention U-Net model and improves segmentation quality in complex or low-contrast regions.
 
 The model is implemented in `modules.py` under the class `ImprovedUNet`.
 
@@ -78,7 +85,10 @@ Training and validation losses are plotted over epochs and saved as:
 
 ![Training and Validation Loss](images/loss_curve.png)
 
-Command to train: python train.py
+Command to train:
+```bash
+python train.py
+```
 
 ## Evaluation
 
@@ -93,7 +103,10 @@ These results demonstrate that the architectural improvements enhance feature le
 
 ![Performance Results](images/dice_scores.png)
 
-Command to evaluate: python predict.py
+Command to evaluate:
+```bash
+python predict.py
+```
 
 ## Visual Results
 
@@ -106,8 +119,8 @@ Below are some example qualitative results on validation data:
 | ![MRI Slice](images/mri_slice_3.png) | ![Ground Truth](images/ground_truth_3.png) | ![Model Prediction](images/model_prediction_3.png) |
 
 ## References
-F. Isensee, P. Kickingereder, W. Wick, M. Bendszus, and K. H. Maier-Hein, “Brain Tumor Segmentation and Radiomics Survival Prediction: Contribution to the BRATS 2017 Challenge,” Feb. 28, 2018, arXiv: arXiv:1802.10508. doi: 10.48550/arXiv.1802.10508.
-L. Rundo et al., “USE-Net: Incorporating Squeeze-and-Excitation blocks into U-Net for prostate zonal segmentation of multi-institutional MRI datasets,” Neurocomputing, vol. 365, pp. 31–43, Nov. 2019, doi: 10.1016/j.neucom.2019.07.006.
-O. Ronneberger, P. Fischer, and T. Brox, “U-Net: Convolutional Networks for Biomedical Image Segmentation,” May 18, 2015, arXiv: arXiv:1505.04597. doi: 10.48550/arXiv.1505.04597.
-O. Oktay et al., “Attention U-Net: Learning Where to Look for the Pancreas,” May 20, 2018, arXiv: arXiv:1804.03999. doi: 10.48550/arXiv.1804.03999.
-Y. Zhao, H. Yang, H. Yan, S. Shen, D. Cai, and X. Lyu, “Benggang Extraction Based on Improved U-Net Model from Satellite Remote Sensing Images,” in 2023 4th International Conference on Computer Vision, Image and Deep Learning (CVIDL), May 2023, pp. 170–174. doi: 10.1109/CVIDL58838.2023.10167177.
+F. Isensee, P. Kickingereder, W. Wick, M. Bendszus, and K. H. Maier-Hein, “Brain Tumor Segmentation and Radiomics Survival Prediction: Contribution to the BRATS 2017 Challenge,” Feb. 28, 2018, arXiv: arXiv:1802.10508. doi: 10.48550/arXiv.1802.10508. \
+L. Rundo et al., “USE-Net: Incorporating Squeeze-and-Excitation blocks into U-Net for prostate zonal segmentation of multi-institutional MRI datasets,” Neurocomputing, vol. 365, pp. 31–43, Nov. 2019, doi: 10.1016/j.neucom.2019.07.006. \
+O. Ronneberger, P. Fischer, and T. Brox, “U-Net: Convolutional Networks for Biomedical Image Segmentation,” May 18, 2015, arXiv: arXiv:1505.04597. doi: 10.48550/arXiv.1505.04597. \
+O. Oktay et al., “Attention U-Net: Learning Where to Look for the Pancreas,” May 20, 2018, arXiv: arXiv:1804.03999. doi: 10.48550/arXiv.1804.03999. \
+Y. Zhao, H. Yang, H. Yan, S. Shen, D. Cai, and X. Lyu, “Benggang Extraction Based on Improved U-Net Model from Satellite Remote Sensing Images,” in 2023 4th International Conference on Computer Vision, Image and Deep Learning (CVIDL), May 2023, pp. 170–174. doi: 10.1109/CVIDL58838.2023.10167177. 
