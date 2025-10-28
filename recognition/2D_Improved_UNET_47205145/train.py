@@ -18,10 +18,10 @@ learning_rate = 3e-3
 num_epochs = 25
 
 # Dataset paths
-train_images = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_train"
-train_masks = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
-test_images = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_test"
-test_masks = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
+train_images = "HipMRI_Study_open/keras_slices_data/keras_slices_train"
+train_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_train"
+test_images = "HipMRI_Study_open/keras_slices_data/keras_slices_test"
+test_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_test"
 
 # Load data
 train_loader = create_dataloaders(train_images, train_masks, batch_size, standardize=True)

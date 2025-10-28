@@ -16,8 +16,8 @@ num_classes = 6
 model_path = "model.pth"
 
 # Dataset paths
-validate_images = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_validate"
-validate_masks = "/home/groups/comp3710/HipMRI_Study_open/keras_slices_data/keras_slices_seg_validate"
+validate_images = "HipMRI_Study_open/keras_slices_data/keras_slices_validate"
+validate_masks = "HipMRI_Study_open/keras_slices_data/keras_slices_seg_validate"
 
 # Load validation data
 validation_loader = create_dataloaders(validate_images, validate_masks, batch_size, standardize=True)
