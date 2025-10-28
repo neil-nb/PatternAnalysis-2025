@@ -71,3 +71,7 @@ Below are some example qualitative results on validation data:
 | ![MRI Slice](images/mri_slice_2.png) | ![Ground Truth](images/ground_truth_2.png) | ![Model Prediction](images/model_prediction_2.png) |
 | ![MRI Slice](images/mri_slice_3.png) | ![Ground Truth](images/ground_truth_3.png) | ![Model Prediction](images/model_prediction_3.png) |
 
+## References
+F. Isensee, P. Kickingereder, W. Wick, M. Bendszus, and K. H. Maier-Hein, “Brain Tumor Segmentation and Radiomics Survival Prediction: Contribution to the BRATS 2017 Challenge,” Feb. 28, 2018, arXiv: arXiv:1802.10508. doi: 10.48550/arXiv.1802.10508.
+O. Ronneberger, P. Fischer, and T. Brox, “U-Net: Convolutional Networks for Biomedical Image Segmentation,” May 18, 2015, arXiv: arXiv:1505.04597. doi: 10.48550/arXiv.1505.04597.
+
