@@ -33,7 +33,7 @@ The scSE mechanism combines two complementary forms of attention:
 - Channel Squeeze-and-Excitation (cSE): Learns to reweight feature channels based on global context, emphasising the most informative filters. 
 - Spatial Squeeze-and-Excitation (sSE): Learns spatial masks to highlight important regions within feature maps. 
 
-Together, they improve feature recalibration by focussing the model only on relevant anatomical structures and suppressing background noise. 
+Together, they improve feature recalibration by focusing the model only on relevant anatomical structures and suppressing background noise. 
 
 #### Attention Gates
 Attention gates are applied to skip connections before feature concatenation in the decoder. They learn to selectively pass information from the encoder, conditioning it on the decoder’s current context. 
@@ -99,7 +99,6 @@ The script also produces visual comparisons between input images, true masks, an
 ### Results
 The Improved U-Net achieved robust segmentation performance across all anatomical classes, showing effective localisation of the prostate and surrounding organs.
 Quantitatively, average Dice scores across classes were in the range of 0.825-0.994, with the bladder and background being the least and most accurately predicted classes respectively.
-These results demonstrate that the architectural improvements enhance feature learning and generalisation to unseen slices.
 
 ![Performance Results](images/dice_scores.png)
 
