@@ -85,7 +85,7 @@ Training and validation losses are plotted over epochs and saved as:
 
 ![Training and Validation Loss](images/loss_curve.png)
 
-Command to train:
+Command to train (assuming your terminal is positioned at `/2D_Improved_UNET_47205145/`, which is also assumed to contain HipMRI_Study_open):
 ```bash
 python train.py
 ```
@@ -103,7 +103,7 @@ These results demonstrate that the architectural improvements enhance feature le
 
 ![Performance Results](images/dice_scores.png)
 
-Command to evaluate:
+Command to evaluate (assuming your terminal is positioned at /2D_Improved_UNET_47205145/, which is also assumed to contain HipMRI_Study_open):
 ```bash
 python predict.py
 ```

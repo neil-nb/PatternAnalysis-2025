@@ -94,7 +94,7 @@ def train():
     Executes the training loop for the Improved U-Net model, recording training and validation losses.
     """
     history_train, history_val = [], []
-    print("Beginning model optimisation...\n")
+    print("Training model...\n")
 
     for epoch_idx in range(num_epochs):
         net.train()
